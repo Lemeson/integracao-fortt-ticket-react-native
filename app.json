@@ -1,8 +1,8 @@
 {
   "expo": {
-    "platforms": ["ios", "android", "web"],
     "name": "Integracao-TomTicket-OMIE",
     "slug": "Integracao-TomTicket-OMIE",
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -22,7 +22,8 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "webpack"
     }
   }
 }
