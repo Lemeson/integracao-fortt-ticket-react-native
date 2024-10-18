@@ -58,4 +58,4 @@ const stylesI = StyleSheet.create({
   container: {
     flex: 1,
   },
-});git add .
+});
