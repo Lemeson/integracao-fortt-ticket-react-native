@@ -15,10 +15,11 @@ const Header: React.FC<HeaderProps> = ({ title, leftButton, rightButton, leftBut
     <View style={styles.header}>
       <Button title={leftButtonText} onPress={leftButton} />
       <Text style={styles.title}>{title}</Text>
-      <Button title={rightButtonText} onPress={rightButton} />
-      
-      {/* Link para navegar para a TenantScreen */}
-      <Button title="Ir para Tenant" onPress={() => navigation.navigate('Tenant')} />
+      <View style={styles.container}>
+        <Button title={rightButtonText} onPress={rightButton} />
+        <View style={{ marginRight: 10 }} />
+        <Button title="Tenant" onPress={() => navigation.navigate('Tenant')} />
+       </View>
     </View>
   );
 };
@@ -35,6 +36,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
+  container: {
+    display: 'flex',
+    justifyContent: 'space-between', // Distribui espaço entre os botões (opcional)
+    flexDirection: 'row', // Alinha os itens na horizontal
+    alignItems: 'center', // Centraliza os itens verticalmente (opcional)
+  }
 });
 
 export default Header;

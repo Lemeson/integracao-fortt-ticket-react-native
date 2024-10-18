@@ -14,10 +14,11 @@ const TenantScreen = () => {
   // Função de login que chama a API
   const handleLogin = async () => {
     try {
-      const token = await login(username, password, securityCode);
+      // Chame a função login com os parâmetros na ordem correta
+      const token = await login(securityCode, password, username);
       setToken(token); // Armazenando o token após o login
       Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      fetchSystemStatus(token); // Faz a requisição para obter o status do sistema
+     // fetchSystemStatus(token); // Faz a requisição para obter o status do sistema (descomentando isso, você obterá o status após o login)
     } catch (error) {
       Alert.alert('Erro', 'Falha ao fazer login. Verifique suas credenciais.');
     }

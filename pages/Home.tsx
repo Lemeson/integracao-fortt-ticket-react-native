@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Alert, Button, StyleSheet } from 'react-native';
+import { View, Text, Alert, Button, StyleSheet, GestureResponderEvent } from 'react-native';
 import Header from '../components/Header';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
+import { styles } from '../styles/styles';
+import { AtualizarClientesTomTicket } from '../controller/tomTicketOMIEController';
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
 
@@ -23,29 +25,37 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     supabase.auth.signOut()
   };
 
+  async function fetchAndSyncClients(): Promise<void> {
+      try {
+        await AtualizarClientesTomTicket();
+        console.log('Clientes sincronizados com sucesso.');
+      } catch (error) {
+        console.error('erro ao sincronizar clientes:', error)
+      }
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={stylesI.container}>
       {/* Usando o componente Header */}
       <Header
-        title="Página Inicial"
+        title="Sistema de Sincronização TomTicket OMIE Fortt"
         leftButton={handleLeftButton}
         rightButton={handleRightButton}
         leftButtonText="Voltar"
         rightButtonText="Sign Out"
         navigation={navigation}  // Passa o navigation para o Header
       />
-
-      {/* Conteúdo da tela */}
-      <Text>Bem-vindo à Página Inicial!</Text>
-
-      {/* Link para navegar para a TenantScreen */}
-      <Button title="Ver Status do Sistema" onPress={() => navigation.navigate('Tenant')} />
+      <View style={styles.container}>
+      <View style={styles.card}>
+        <Button title="Atualizar Clientes" onPress={fetchAndSyncClients} />
+      </View>
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const stylesI = StyleSheet.create({
   container: {
     flex: 1,
   },
-});
+});git add .
