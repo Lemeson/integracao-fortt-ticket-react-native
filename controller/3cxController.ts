@@ -1,60 +1,71 @@
 // src/api/api.ts
 import axios from 'axios';
-
 import { LoginResponse, SystemStatusResponse } from './types';
 
-// URL base da API
-const API_URL = 'https://fortt.my3cx.com.br/xapi/v1';
+// Função para fazer login e obter tokens de múltiplos PBX
+export const loginAndFetchTokens = async (
+  pbxList: { url: string, securityCode: string, username: string, password: string, statusListURL: string }[],
+): Promise<{ url: string, token: string }[]> => {
+  const tokens = [];
 
-// URL do Login
-const API_URL_LOGIN = 'https://fortt.my3cx.com.br/webclient/api/Login/GetAccessToken';
+  for (const pbx of pbxList) {
+    try {
+      const response = await fetch(`http://localhost:3001/api/login/data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          URL: pbx.url,
+          Password: pbx.password,
+          Username: pbx.username,
+          SecurityCode: pbx.securityCode,          
+        }),
+      });
 
-// Função para fazer login e obter o token
-export const login = async (
-  securityCode: string,
-  password: string,
-  username: string,
-): Promise<string> => {
-  try {
-    const response = await fetch(API_URL_LOGIN, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json', // Certifique-se de que a API aceita JSON
-      },
-      body: JSON.stringify({
-        SecurityCode: securityCode,
-        Password: password,
-        Username: username,
-      }),
-    });
-
-    const data: LoginResponse = await response.json();
-
-    if (response.ok && data.Status === 'AuthSuccess') {
-      return data.Token.access_token; // Retorna o token de acesso
-    } else {
-      throw new Error('Falha na autenticação');
+      const data = await response.json(); //LoginResponse = await response.json();
+      console.log("Dados recebidos:", data); // Log para depuração
+      
+      if (data.status == 200) {        //if (data.Status === 'AuthSuccess') {
+        tokens.push({ url: pbx.statusListURL, token: data.data.Token.access_token });
+      } else {
+        console.error(`Falha na autenticação para ${pbx.url}`, data); // Adicionando dados para logs detalhados
+      }
+      
+    } catch (error) {
+      console.error(`Erro no login para ${pbx.url}:`, error);
     }
-  } catch (error) {
-    console.error('Erro no login:', error);
-    throw new Error('Falha na autenticação');
   }
+
+  console.log(tokens);
+  return tokens;
 };
 
+// Função para obter status do sistema de múltiplos PBX
+export const fetchSystemStatuses = async (
+  tokens: { url: string, token: string }[],
+): Promise<{ url: string, status: SystemStatusResponse }[]> => {
+  const statuses = [];
 
-// Função para obter o status do sistema
-export const getSystemStatus = async (token: string): Promise<SystemStatusResponse> => {
-  try {
-    const response = await axios.post<SystemStatusResponse>(`${API_URL}/SystemStatus`, {}, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json', // Adicionar este cabeçalho se necessário
-      },
-    });
+  for (const pbx of tokens) {
+    try {
+      const response = await fetch(`http://localhost:3001/api/atualizar/data`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `${pbx.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: pbx.url,       
+        }),
+      });
 
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar status do sistema:', error);
-    throw new Error('Falha ao obter status');
+      const data = await response.json();
+      statuses.push({ url: pbx.url, status: data });
+    } catch (error) {
+      console.error(`Erro ao buscar status de ${pbx.url}:`, error);
+    }
   }
+
+  return statuses;
 };
